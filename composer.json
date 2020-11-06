@@ -1,0 +1,6 @@
+{
+  "require": {
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "~6.0"
+  }
+}

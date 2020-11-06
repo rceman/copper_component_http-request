@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Component\HttpRequest\Entity;
+namespace Copper\Component\HttpRequest\Entity;
 
 class ResponseStatus
 {

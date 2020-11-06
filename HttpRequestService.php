@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Component\HttpRequest;
+namespace Copper\Component\HttpRequest;
 
-use App\Component\HttpRequest\Entity\ResponseStatus;
+use Copper\Component\HttpRequest\Entity\ResponseStatus;
 use GuzzleHttp;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;

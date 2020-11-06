@@ -1,2 +1,2 @@
-# copper_component_http-request
+# copper_http-request
 Copper Component - HttpRequest

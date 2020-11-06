@@ -1,5 +1,5 @@
 {
-  "name": "rceman/copper_component_http-request",
+  "name": "rceman/copper_http-request",
   "type": "component",
   "license": "MIT",
   "description": "Copper Component - HttpRequest",

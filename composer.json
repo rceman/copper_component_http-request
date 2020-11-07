@@ -5,7 +5,7 @@
   "description": "Copper Component - HttpRequest",
   "require": {
     "ext-json": "*",
-    "guzzlehttp/guzzle": "~6.0"
+    "guzzlehttp/guzzle": "6.5.5"
   },
   "autoload": {
     "psr-4": { "Copper\\Component\\HttpRequest\\": "" }

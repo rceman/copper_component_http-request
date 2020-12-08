@@ -18,6 +18,8 @@ class HttpRequestService
     private $retryMaxCount = 1;
     private $retryMsgNeedle = false;
 
+    private $proxyConfig = false;
+
     private $default_response = [
         "msg" => "",
         "status" => false,
@@ -41,6 +43,25 @@ class HttpRequestService
     public function setRetryMaxCount($maxCount)
     {
         $this->retryMaxCount = $maxCount;
+    }
+
+    /**
+     * Setup Proxy
+     * 
+     * With Creds: http://username:password@192.168.16.1:10
+     *
+     * @param string $https - Use this proxy with "https"
+     * @param string $http - Use this proxy with "http"
+     * @param array $no - Don't use a proxy with these ['.mit.edu', 'foo.com']
+     */
+    public function setProxyConfig($https, $http = null, $no = null) {
+        $proxyConfig = [];
+
+        $proxyConfig['https'] = $https;
+        $proxyConfig['http'] = ($http !== null) ? $http : $https;
+        $proxyConfig['no'] = ($no !== null) ? $no : [];
+
+        $this->proxyConfig = $proxyConfig;
     }
 
     public function setRetryMsgNeedle($needle)
@@ -127,11 +148,16 @@ class HttpRequestService
         }
 
         try {
-            $requestResponse = $client->request($method, $url, [
+            $requestParams = [
                 'headers' => $headers,
                 'body' => $body,
                 'allow_redirects' => $this->allow_redirects
-            ]);
+            ];
+
+            if ($this->proxyConfig !== false)
+                $requestParams['proxy'] = $this->proxyConfig;
+
+            $requestResponse = $client->request($method, $url, $requestParams);
 
             $response["status"] = true;
         } catch (BadResponseException $e) {

@@ -23,6 +23,7 @@ class ResponseStatus
     const CODE_201 = 201;
     const CODE_200 = 200;
     const CODE_0 = 0;
+    const CODE_1 = 1;
 
     const CODE_TEXT = [
         self::CODE_500 => 'Internal Server Error',
@@ -37,7 +38,8 @@ class ResponseStatus
         self::CODE_204 => 'No Content',
         self::CODE_201 => 'Created',
         self::CODE_200 => 'OK',
-        self::CODE_0 => 'Unknown Code'
+        self::CODE_0 => 'Unknown Code',
+        self::CODE_1 => 'Failed To Connect'
     ];
 
     /**

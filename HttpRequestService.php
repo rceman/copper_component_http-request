@@ -47,7 +47,7 @@ class HttpRequestService
 
     /**
      * Setup Proxy
-     * 
+     *
      * With Creds: http://username:password@192.168.16.1:10
      *
      * @param string $https - Use this proxy with "https"
@@ -176,6 +176,11 @@ class HttpRequestService
                 "body_size" => 0,
                 "headers" => []
             ];
+
+            if (strpos(strtolower($e->getMessage()), strtolower(ResponseStatus::CODE_TEXT[ResponseStatus::CODE_1])) !== false) {
+                $response["result"]["status_code"] = ResponseStatus::CODE_1;
+                $response["result"]["status_text"] = ResponseStatus::CODE_TEXT[ResponseStatus::CODE_1];
+            }
 
             $response["status"] = false;
             $response["msg"] = $e->getMessage();

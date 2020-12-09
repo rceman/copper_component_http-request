@@ -54,7 +54,8 @@ class HttpRequestService
      * @param string $http - Use this proxy with "http"
      * @param array $no - Don't use a proxy with these ['.mit.edu', 'foo.com']
      */
-    public function setProxyConfig($https, $http = null, $no = null) {
+    public function setProxyConfig($https, $http = null, $no = null)
+    {
         $proxyConfig = [];
 
         $proxyConfig['https'] = $https;
@@ -117,6 +118,18 @@ class HttpRequestService
         $headers = array_merge(['Content-Type' => $contentType], $headers);
     }
 
+    private function detectCustomStatus($message)
+    {
+        $customStatus = false;
+
+        foreach (ResponseStatus::CUSTOM_CODE_MATCH as $code => $matchText) {
+            if (strpos($message, $matchText) !== false)
+                $customStatus = ['code' => $code, 'text' => ResponseStatus::CODE_TEXT[$code]];
+        }
+
+        return $customStatus;
+    }
+
     private function makeRetriedRequest($retryMaxCount, $url, $method, $body = '', $headers = [], $retryCount = 0)
     {
         $response = array_merge([], $this->default_response);
@@ -177,9 +190,11 @@ class HttpRequestService
                 "headers" => []
             ];
 
-            if (strpos(strtolower($e->getMessage()), strtolower(ResponseStatus::CODE_TEXT[ResponseStatus::CODE_1])) !== false) {
-                $response["result"]["status_code"] = ResponseStatus::CODE_1;
-                $response["result"]["status_text"] = ResponseStatus::CODE_TEXT[ResponseStatus::CODE_1];
+            $customStatus = $this->detectCustomStatus($e->getMessage());
+
+            if ($customStatus !== false) {
+                $response["result"]["status_code"] = $customStatus['code'];
+                $response["result"]["status_text"] = $customStatus['text'];;
             }
 
             $response["status"] = false;

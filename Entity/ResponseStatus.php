@@ -24,6 +24,9 @@ class ResponseStatus
     const CODE_200 = 200;
     const CODE_0 = 0;
     const CODE_1 = 1;
+    const CODE_2 = 2;
+    const CODE_3 = 3;
+    const CODE_4 = 4;
 
     const CODE_TEXT = [
         self::CODE_500 => 'Internal Server Error',
@@ -39,7 +42,17 @@ class ResponseStatus
         self::CODE_201 => 'Created',
         self::CODE_200 => 'OK',
         self::CODE_0 => 'Unknown Code',
-        self::CODE_1 => 'Failed To Connect'
+        self::CODE_1 => 'Failed To Connect',
+        self::CODE_2 => 'Connection Reset',
+        self::CODE_3 => 'SSL Error',
+        self::CODE_4 => 'Bad Connect',
+    ];
+
+    const CUSTOM_CODE_MATCH = [
+        self::CODE_1 => 'Failed to connect',
+        self::CODE_2 => 'Connection reset by peer',
+        self::CODE_3 => 'SSL_ERROR_SYSCALL',
+        self::CODE_4 => 'Received HTTP code 5',
     ];
 
     /**

@@ -27,6 +27,7 @@ class ResponseStatus
     const CODE_2 = 2;
     const CODE_3 = 3;
     const CODE_4 = 4;
+    const CODE_5 = 5;
 
     const CODE_TEXT = [
         self::CODE_500 => 'Internal Server Error',
@@ -46,6 +47,7 @@ class ResponseStatus
         self::CODE_2 => 'Connection Reset',
         self::CODE_3 => 'SSL Error',
         self::CODE_4 => 'Bad Connect',
+        self::CODE_5 => 'Timed Out'
     ];
 
     const CUSTOM_CODE_MATCH = [
@@ -53,6 +55,7 @@ class ResponseStatus
         self::CODE_2 => 'Connection reset by peer',
         self::CODE_3 => 'SSL_ERROR_SYSCALL',
         self::CODE_4 => 'Received HTTP code 5',
+        self::CODE_5 => 'Operation timed out'
     ];
 
     /**

@@ -9,8 +9,23 @@ use GuzzleHttp\Exception\GuzzleException;
 
 class HttpRequestHandler
 {
+    public const CONTENT_TYPE_JSON = 'application/json';
+    public const CONTENT_TYPE_FORM = 'application/x-www-form-urlencoded';
+
+    public const AUTHORIZATION_TYPE_BASIC = 'Basic';
+    public const AUTHORIZATION_TYPE_BEARER = 'Bearer';
+
+    public const HEADER_AUTHORIZATION = 'Authorization';
+    public const HEADER_CONTENT_TYPE = 'Content-Type';
+
+    public const METHOD_GET = 'GET';
+    public const METHOD_POST = 'POST';
+    public const METHOD_PUT = 'PUT';
+    public const METHOD_PATCH = 'PATCH';
+    public const METHOD_DELETE = 'DELETE';
+
     private $default_request_headers = [
-        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'
+        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     ];
 
     private $allow_redirects = true;
@@ -38,6 +53,16 @@ class HttpRequestHandler
         $this->verify_ssl = $verify_ssl;
         $this->allow_redirects = $allow_redirects;
         $this->default_request_headers = array_merge($this->default_request_headers, $default_request_headers);
+    }
+
+    public function setContentType($contentType)
+    {
+        $this->default_request_headers[self::HEADER_CONTENT_TYPE] = $contentType;
+    }
+
+    public function setAuthorization($credentials, $type = self::AUTHORIZATION_TYPE_BASIC)
+    {
+        $this->default_request_headers[self::HEADER_AUTHORIZATION] = $type . ' ' . $credentials;
     }
 
     public function setRetryMaxCount($maxCount)
@@ -72,29 +97,34 @@ class HttpRequestHandler
 
     public function GET($url, $headers = [])
     {
-        return $this->makeRequest($url, 'get', '', $headers);
+        return $this->makeRequest($url, self::METHOD_GET, '', $headers);
     }
 
+    /**
+     * Send POST request to url
+     * @param $url
+     * @param string|int|float|array $body
+     * @param array $headers
+     * @return array
+     */
     public function POST($url, $body = '', $headers = [])
     {
-        $headers = array_merge(['Content-Type' => 'application/x-www-form-urlencoded'], $headers);
-
-        return $this->makeRequest($url, 'post', $body, $headers);
+        return $this->makeRequest($url, self::METHOD_POST, $body, $headers);
     }
 
     public function PUT($url, $body = '', $headers = [])
     {
-        return $this->makeRequest($url, 'put', $body, $headers);
+        return $this->makeRequest($url, self::METHOD_PUT, $body, $headers);
     }
 
     public function PATCH($url, $body = '', $headers = [])
     {
-        return $this->makeRequest($url, 'patch', $body, $headers);
+        return $this->makeRequest($url, self::METHOD_PATCH, $body, $headers);
     }
 
     public function DELETE($url, $headers = [])
     {
-        return $this->makeRequest($url, 'delete', '', $headers);
+        return $this->makeRequest($url, self::METHOD_DELETE, '', $headers);
     }
 
     public function allowRedirects($bool = true)
@@ -102,20 +132,33 @@ class HttpRequestHandler
         $this->allow_redirects = $bool;
     }
 
-    private function autoDetectContentType($method, $body, &$headers)
+    /**
+     * @param mixed $body
+     */
+    private function bodyIsJSON($body)
     {
-        if (strtoupper($method) === 'GET')
-            return;
+        if (is_string($body) === false)
+            return false;
 
         $decoded_body = json_decode($body);
 
-        if ($decoded_body === null && json_last_error() !== JSON_ERROR_NONE) {
-            $contentType = 'application/x-www-form-urlencoded';
-        } else {
-            $contentType = 'application/json';
-        }
+        if ($decoded_body === null && json_last_error() !== JSON_ERROR_NONE)
+            return false;
 
-        $headers = array_merge(['Content-Type' => $contentType], $headers);
+        return true;
+    }
+
+    private function autoDetectContentType($method, $body, &$headers)
+    {
+        if (in_array(strtoupper($method), [self::METHOD_GET, self::METHOD_DELETE]))
+            return;
+
+        if (self::bodyIsJSON($body))
+            $contentType = self::CONTENT_TYPE_JSON;
+        else
+            $contentType = self::CONTENT_TYPE_FORM;
+
+        $headers = array_merge([self::HEADER_CONTENT_TYPE => $contentType], $headers);
     }
 
     private function detectCustomStatus($message)
@@ -139,7 +182,7 @@ class HttpRequestHandler
         $this->autoDetectContentType($method, $body, $headers);
 
         $client = new GuzzleHttp\Client(array(
-            'verify' => $this->verify_ssl
+            GuzzleHttp\RequestOptions::VERIFY => $this->verify_ssl
         ));
 
         $response["request"] = [
@@ -151,8 +194,8 @@ class HttpRequestHandler
 
         $response["config"] = [
             "default_request_headers" => $this->default_request_headers,
+            "verify_ssl" => $this->verify_ssl,
             "allow_redirects" => $this->allow_redirects,
-            "verify_ssl" => $this->verify_ssl
         ];
 
         if ($url === '') {
@@ -162,13 +205,17 @@ class HttpRequestHandler
 
         try {
             $requestParams = [
-                'headers' => $headers,
-                'body' => $body,
-                'allow_redirects' => $this->allow_redirects
+                GuzzleHttp\RequestOptions::HEADERS => $headers,
+                GuzzleHttp\RequestOptions::ALLOW_REDIRECTS => $this->allow_redirects
             ];
 
+            if (is_array($body))
+                $requestParams[GuzzleHttp\RequestOptions::FORM_PARAMS] = $body;
+            else
+                $requestParams[GuzzleHttp\RequestOptions::BODY] = $body;
+
             if ($this->proxyConfig !== false)
-                $requestParams['proxy'] = $this->proxyConfig;
+                $requestParams[GuzzleHttp\RequestOptions::PROXY] = $this->proxyConfig;
 
             $requestResponse = $client->request($method, $url, $requestParams);
 
